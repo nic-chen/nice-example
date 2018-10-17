@@ -3,8 +3,8 @@ package dao
 import (
 	"strings"
 	"database/sql"
-	"nice"
-	"test/config"
+	"github.com/nic-chen/nice"
+	"../config"
 	"strconv"
 	_ "github.com/go-sql-driver/mysql"
 )

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"nice"
+	"github.com/nic-chen/nice"
 )
 
 type Controller struct {

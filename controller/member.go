@@ -2,9 +2,9 @@ package controller
 
 import (
 	"encoding/json"
-	"nice"
-	"test/dao"
-	"test/config"
+	"github.com/nic-chen/nice"
+	"../dao"
+	"../config"
 )
 
 type member struct{}

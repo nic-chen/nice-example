@@ -1,8 +1,8 @@
 package main
 
 import (
-	"nice"
-	"test/config"
+	"github.com/nic-chen/nice"
+	"./config"
 )
 
 func main() {

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"nice"
-	"test/config"
-	"test/controller"
+	"github.com/nic-chen/nice"
+	"./config"
+	"./controller"
 )
 
 func Router() {
