@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/nic-chen/nice"
 	"../dao"
-	"../config"
+	"../../config"
 )
 
 type member struct{}
