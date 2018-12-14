@@ -3,12 +3,15 @@ package controller
 import (
 	"time"
 	"context"
+	
+	"../../config"
+
 	"github.com/nic-chen/nice"
-	//"github.com/nic-chen/nice/micro/dialer"
+	"github.com/nic-chen/nice/micro/tracing"
+
 	"google.golang.org/grpc"
 	"github.com/nic-chen/nice/micro/registry/etcdv3"
-
-	"../../config"
+	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
 )
 
 type Controller struct {
@@ -44,7 +47,8 @@ func newSrvDialer(serviceName string) *grpc.ClientConn {
 	b := grpc.RoundRobin(r)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	conn, err := grpc.DialContext(ctx, config.NamingAddr, grpc.WithInsecure(), grpc.WithBalancer(b), grpc.WithBlock())
+	tracer, err := tracing.Init(config.CliName, config.JaegerAddr)
+	conn, err := grpc.DialContext(ctx, config.NamingAddr, grpc.WithInsecure(), grpc.WithBalancer(b), grpc.WithBlock(), grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(tracer)))
 	cancel()
 	if err != nil {
 		panic(err)
