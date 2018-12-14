@@ -8,9 +8,11 @@ import (
 	"syscall"
 	"strings"
 	"./srv"
-	"github.com/nic-chen/nice/micro/registry"
-	_ "github.com/nic-chen/nice/micro/registry/etcdv3"
 	"../config"
+	"github.com/nic-chen/nice/micro/registry"
+	"github.com/nic-chen/nice/micro/tracing"
+	_ "github.com/nic-chen/nice/micro/registry/etcdv3"
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
 func usage() {
@@ -29,6 +31,7 @@ func main() {
 
 	var (
 		register registry.Registry
+		tracer opentracing.Tracer
 		err      error
 	)
 
@@ -37,7 +40,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var run func(registry.Registry)
+	var run func(registry.Registry, opentracing.Tracer)
 
 	switch cmd := strings.ToLower(os.Args[1]); cmd {
 	case "all":
@@ -52,7 +55,6 @@ func main() {
 	}
 
 	if config.SrvName != "" && config.SrvHost != "" && config.SrvPort != "" && config.NamingAddr != ""  {
-
 		options := &registry.Options{
 			Name: config.SrvName,
 			Host: config.SrvHost,
@@ -61,13 +63,14 @@ func main() {
 			Ssrv: config.NamingAddr,
 		}
 		register, err = registry.DefaultRegistry(options)
-
 		log.Printf("NamingAddr: %s", config.NamingAddr)
-
 		if err != nil {
 			panic(err)
 		}
-
+		tracer, err = tracing.Init(config.SrvName, config.JaegerAddr)
+		if err != nil {
+			panic(err)
+		}
 		//监听退出
 		ch := make(chan os.Signal, 1)
 		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
@@ -79,5 +82,5 @@ func main() {
 		}()
 	}
 
-	run(register);
+	run(register, tracer);
 }

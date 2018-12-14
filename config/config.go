@@ -17,6 +17,8 @@ var (
 	SrvPort     = "50001"
 	SrvCheckTTL = 15
 
+	JaegerAddr  = "127.0.0.1:6831"
+
 	TestSrvName = SrvName
 )
 

@@ -3,15 +3,18 @@ package srv
 import (
 	"fmt"
 	"net"
-	"github.com/nic-chen/nice/micro"
-	"github.com/nic-chen/nice/micro/registry"
+
 	"../../proto/greeter"
 	"../../services/greetersrv"
 	"../../config"
 
+	"github.com/nic-chen/nice/micro"
+	"github.com/nic-chen/nice/micro/registry"
+
+	opentracing "github.com/opentracing/opentracing-go"
 )
 
-func RunGreeter(register registry.Registry) {
+func RunGreeter(register registry.Registry, tracer opentracing.Tracer) {
 	var (
 		err    error
 	)
@@ -24,6 +27,7 @@ func RunGreeter(register registry.Registry) {
 		// micro.WithTracer(tracer),
 		// micro.WithLogger(dlog.Strict()),
 		micro.WithRegistry(register, config.SrvName, listen),
+		micro.WithTracer(tracer),
 	}
 
 
