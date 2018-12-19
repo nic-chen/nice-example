@@ -23,7 +23,6 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "The commands are\n")
 	fmt.Fprintf(os.Stderr, "  all          Boots all services\n")
 	fmt.Fprintf(os.Stderr, "  api          Api gateway\n")
-	fmt.Fprintf(os.Stderr, "  gteeter      Greeter service\n")
 	fmt.Fprintf(os.Stderr, "\n")
 }
 
@@ -47,8 +46,6 @@ func main() {
 		run = srv.RunAll
 	case "api":
 		run = srv.RunApi
-	case "greeter":
-		run = srv.RunGreeter
 	case "member":
 		run = srv.RunMemberSrv		
 	default:
