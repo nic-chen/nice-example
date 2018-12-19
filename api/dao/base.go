@@ -79,6 +79,8 @@ func (d *Tbl) implode(data map[string]interface{}) string{
 func convertToString(m interface{}) string {
 	switch m.(type) {
 	case int64:
+		return strconv.FormatInt(m.(int64),10)
+	case int32:
 	case int:
 		return strconv.Itoa(m.(int))
 		break

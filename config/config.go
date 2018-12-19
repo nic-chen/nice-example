@@ -12,15 +12,15 @@ var (
 	HTTPBIND    = "0.0.0.0:8202"
 	
 	NamingAddr  = "http://127.0.0.1:2379"
-	SrvName     = "test-srv"
+	SrvName     = "member-srv"
 	SrvHost     = "localhost"
 	SrvPort     = "50001"
-	SrvCheckTTL = 15
-	CliName     = "test-cli"
+	SrvCheckTTL = 30
+	CliName     = "member-cli"
 
 	JaegerAddr  = "127.0.0.1:6831"
 
-	TestSrvName = SrvName
+	MemberSrvName = SrvName
 )
 
 const (

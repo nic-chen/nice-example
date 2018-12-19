@@ -11,4 +11,5 @@ func Router() {
 	
 	n.Get("/member/:id", controller.Member.Info);
 	n.Get("/greeter/:name", controller.Greeter.Hello);
+	n.Get("/info/:id", controller.Member.Basic);
 }

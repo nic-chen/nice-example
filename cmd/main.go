@@ -49,6 +49,8 @@ func main() {
 		run = srv.RunApi
 	case "greeter":
 		run = srv.RunGreeter
+	case "member":
+		run = srv.RunMemberSrv		
 	default:
 		usage()
 		os.Exit(1)

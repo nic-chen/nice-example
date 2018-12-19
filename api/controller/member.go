@@ -1,10 +1,14 @@
 package controller
 
 import (
+	"log"
+	"context"
 	"encoding/json"
 	"github.com/nic-chen/nice"
 	"../dao"
 	"../../config"
+
+	proto "../../proto/member"
 )
 
 type member struct{}
@@ -19,15 +23,12 @@ func (member) Info(c *nice.Context) {
 	m, _ := d.Fetch(id);
 
 	j, err := json.Marshal(1);
-	n.Logger().Printf("j: %v", j);
 	if err!=nil{
 		n.Logger().Printf("j err: %v", err);
 	}
 
     var jj int
     json.Unmarshal([]byte(j), &jj)
-    n.Logger().Printf("jj: %v", jj);
-
 
 	if len(m)>0 {
 		delete(m, "password")
@@ -35,4 +36,27 @@ func (member) Info(c *nice.Context) {
 	}
 
 	RenderJson(c, 0, "", m)
+}
+
+func (member) Basic(c *nice.Context) {
+	id := c.ParamInt64("id");
+
+    //服务名
+	conn := newSrvDialer(config.MemberSrvName)
+
+	log.Printf("connecting:%s", config.MemberSrvName)
+
+    //grpc client
+	client := proto.NewMemberClient(conn);
+
+	req := &proto.Request{
+		Id: id,
+	}
+
+	res, err := client.Info(context.Background(), req)
+	if err != nil {
+		log.Panicf("dialer error: %v", err)
+	}	
+
+	RenderJson(c, 0, "", res)
 }
