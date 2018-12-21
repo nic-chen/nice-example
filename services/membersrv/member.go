@@ -15,7 +15,12 @@ func NewMemberService() *memberService {
 
 func (*memberService) Info(ctx context.Context, req *member.Request) (*member.Response, error) {
 	d := dao.NewMemberDao();
+
 	m, _ := d.Fetch(req.Id);
 
-	return &member.Response{Id: m["id"].(int64), Nickname: m["nickname"].(string), Avatar: m["avatar"].(string)}, nil
+	if(len(m)<1){
+		return &member.Response{Id: 0, Nickname: "", Avatar: ""}, nil
+	}
+
+	return &member.Response{Id: int32(m["id"].(int64)), Nickname: m["nickname"].(string), Avatar: m["avatar"].(string)}, nil
 }

@@ -5,11 +5,11 @@ service Member {
 }
 
 message Request {
-    int64 id = 1;
+    int32 id = 1;
 }
 
 message Response {
-    int64 id = 1;
+    int32 id = 1;
     string nickname = 2;
     string avatar = 3;
 }

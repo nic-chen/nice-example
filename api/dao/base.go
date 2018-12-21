@@ -9,6 +9,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type Columns struct {
+}
 
 type Tbl struct {
 	Key string              //主键
@@ -75,12 +77,27 @@ func (d *Tbl) implode(data map[string]interface{}) string{
 	return sql;
 }
 
+
+// func (d *Tbl) Fetch_cache(value interface{}) (map[string]interface{}, error){
+
+// }
+
+// func (d *Tbl) Store_cache(value interface{}, data map[string]interface{}) error{
+
+// }
+
+// func (d *Tbl) Delete_cache(value interface{}) error{
+
+// }
+
+
 // 把数据转换为字符串
 func convertToString(m interface{}) string {
 	switch m.(type) {
 	case int64:
 		return strconv.FormatInt(m.(int64),10)
 	case int32:
+		return strconv.Itoa(int(m.(int32)))
 	case int:
 		return strconv.Itoa(m.(int))
 		break

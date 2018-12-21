@@ -39,7 +39,7 @@ func (member) Info(c *nice.Context) {
 }
 
 func (member) Basic(c *nice.Context) {
-	id := c.ParamInt64("id");
+	id := c.ParamInt32("id");
 
     //服务名
 	conn := newSrvDialer(config.MemberSrvName)

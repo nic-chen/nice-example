@@ -24,7 +24,7 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
 type Request struct {
-	Id                   int64    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id                   int32    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -34,7 +34,7 @@ func (m *Request) Reset()         { *m = Request{} }
 func (m *Request) String() string { return proto.CompactTextString(m) }
 func (*Request) ProtoMessage()    {}
 func (*Request) Descriptor() ([]byte, []int) {
-	return fileDescriptor_member_8006effc07fc90a3, []int{0}
+	return fileDescriptor_member_c8f4544fa2adab46, []int{0}
 }
 func (m *Request) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Request.Unmarshal(m, b)
@@ -54,7 +54,7 @@ func (m *Request) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Request proto.InternalMessageInfo
 
-func (m *Request) GetId() int64 {
+func (m *Request) GetId() int32 {
 	if m != nil {
 		return m.Id
 	}
@@ -62,7 +62,7 @@ func (m *Request) GetId() int64 {
 }
 
 type Response struct {
-	Id                   int64    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id                   int32    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	Nickname             string   `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
 	Avatar               string   `protobuf:"bytes,3,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -74,7 +74,7 @@ func (m *Response) Reset()         { *m = Response{} }
 func (m *Response) String() string { return proto.CompactTextString(m) }
 func (*Response) ProtoMessage()    {}
 func (*Response) Descriptor() ([]byte, []int) {
-	return fileDescriptor_member_8006effc07fc90a3, []int{1}
+	return fileDescriptor_member_c8f4544fa2adab46, []int{1}
 }
 func (m *Response) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_Response.Unmarshal(m, b)
@@ -94,7 +94,7 @@ func (m *Response) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Response proto.InternalMessageInfo
 
-func (m *Response) GetId() int64 {
+func (m *Response) GetId() int32 {
 	if m != nil {
 		return m.Id
 	}
@@ -192,18 +192,18 @@ var _Member_serviceDesc = grpc.ServiceDesc{
 	Metadata: "member.proto",
 }
 
-func init() { proto.RegisterFile("member.proto", fileDescriptor_member_8006effc07fc90a3) }
+func init() { proto.RegisterFile("member.proto", fileDescriptor_member_c8f4544fa2adab46) }
 
-var fileDescriptor_member_8006effc07fc90a3 = []byte{
+var fileDescriptor_member_c8f4544fa2adab46 = []byte{
 	// 146 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xc9, 0x4d, 0xcd, 0x4d,
 	0x4a, 0x2d, 0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x57, 0x92, 0xe4, 0x62, 0x0f, 0x4a, 0x2d, 0x2c,
-	0x4d, 0x2d, 0x2e, 0x11, 0xe2, 0xe3, 0x62, 0xca, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0e,
+	0x4d, 0x2d, 0x2e, 0x11, 0xe2, 0xe3, 0x62, 0xca, 0x4c, 0x91, 0x60, 0x54, 0x60, 0xd4, 0x60, 0x0d,
 	0x62, 0xca, 0x4c, 0x51, 0xf2, 0xe3, 0xe2, 0x08, 0x4a, 0x2d, 0x2e, 0xc8, 0xcf, 0x2b, 0x4e, 0x45,
 	0x97, 0x13, 0x92, 0xe2, 0xe2, 0xc8, 0xcb, 0x4c, 0xce, 0xce, 0x4b, 0xcc, 0x4d, 0x95, 0x60, 0x52,
 	0x60, 0xd4, 0xe0, 0x0c, 0x82, 0xf3, 0x85, 0xc4, 0xb8, 0xd8, 0x12, 0xcb, 0x12, 0x4b, 0x12, 0x8b,
 	0x24, 0x98, 0xc1, 0x32, 0x50, 0x9e, 0x91, 0x2a, 0x17, 0x9b, 0x2f, 0xd8, 0x6a, 0x21, 0x69, 0x2e,
 	0x16, 0xcf, 0xbc, 0xb4, 0x7c, 0x21, 0x0e, 0x3d, 0xa8, 0xdd, 0x52, 0x9c, 0x7a, 0x30, 0xab, 0x92,
-	0xd8, 0xc0, 0x0e, 0x33, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0xcf, 0xd7, 0xa8, 0x99, 0xa8, 0x00,
+	0xd8, 0xc0, 0x0e, 0x33, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x80, 0x4f, 0x00, 0x66, 0xa8, 0x00,
 	0x00, 0x00,
 }
