@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"log"
 	"context"
 	"encoding/json"
 	"github.com/nic-chen/nice"
@@ -44,7 +43,9 @@ func (member) Basic(c *nice.Context) {
     //服务名
 	conn := newSrvDialer(config.MemberSrvName)
 
-	log.Printf("connecting:%s", config.MemberSrvName)
+	n := nice.Instance(config.APP_NAME);
+	
+	n.Logger().Printf("connecting:%s", config.MemberSrvName);
 
     //grpc client
 	client := proto.NewMemberClient(conn);
@@ -55,7 +56,7 @@ func (member) Basic(c *nice.Context) {
 
 	res, err := client.Info(context.Background(), req)
 	if err != nil {
-		log.Panicf("dialer error: %v", err)
+		n.Logger().Printf("dialer error: %v", err);
 	}	
 
 	RenderJson(c, 0, "", res)

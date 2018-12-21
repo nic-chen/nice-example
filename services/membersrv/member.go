@@ -22,5 +22,5 @@ func (*memberService) Info(ctx context.Context, req *member.Request) (*member.Re
 		return &member.Response{Id: 0, Nickname: "", Avatar: ""}, nil
 	}
 
-	return &member.Response{Id: int32(m["id"].(int64)), Nickname: m["nickname"].(string), Avatar: m["avatar"].(string)}, nil
+	return &member.Response{Id: dao.ConvertToInt32(m["id"]), Nickname: m["nickname"].(string), Avatar: m["avatar"].(string)}, nil
 }

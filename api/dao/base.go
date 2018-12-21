@@ -2,6 +2,7 @@ package dao
 
 import (
 	"strings"
+	"encoding/json"
 	"database/sql"
 	"github.com/nic-chen/nice"
 	"../../config"
@@ -9,25 +10,27 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Columns struct {
-}
 
 type Tbl struct {
 	Key string              //主键
 	Name string             // 表名
-	Cols map[string]string  // 表的所有列信息
+	//Cols map[string]interface{}  // 表的所有列信息
 }
 
 func (d *Tbl) Fetch(value interface{}) (map[string]interface{}, error) {
-
 	cache := nice.Instance(config.APP_NAME).Cache();
 	if cache!=nil {
+		data, _ := d.Fetch_cache(value);
+		if data!=nil{
+			nice.Instance(config.APP_NAME).Logger().Printf("data fetch from cache");
+			return data, nil
+		}
 	}
 	
 	db  := nice.Instance(config.APP_NAME).Db();
 	tbl := d.Name;
 	col := d.Key;
-	val := convertToString(value);
+	val := ConvertToString(value);
 	sql := ` SELECT * FROM ` + tbl + ` WHERE ` + "`" + col + "`=?";
 	tmp := make(map[string]interface{});
 	res, err := db.Query(sql, val) // 执行语句并返回
@@ -37,14 +40,17 @@ func (d *Tbl) Fetch(value interface{}) (map[string]interface{}, error) {
 	}
 
 	if len(res)>0 {
+		d.Store_cache(value, res[0]);
 		return res[0], err
 	}
+
+	d.Store_cache(value, tmp);
 
 	return tmp, err;
 }
 
 func (d *Tbl) Insert(data map[string]interface{}, replace bool) (sql.Result, error) {
-	db := nice.Instance(config.APP_NAME).Db(); //.(*Mysql)
+	db := nice.Instance(config.APP_NAME).Db();
 	tbl := d.Name;
 
 	cmd := ` INSERT INTO `;
@@ -61,38 +67,93 @@ func (d *Tbl) Insert(data map[string]interface{}, replace bool) (sql.Result, err
 	return res, err
 }
 
+func (d *Tbl) Update(value interface{}, data map[string]interface{}) (sql.Result, error) {
+	db := nice.Instance(config.APP_NAME).Db();
+	tbl := d.Name;
+	cmd := ` UPDATE `;
+	kv := d.implode(data);
+	val := ConvertToString(value);
+	sql := cmd+tbl+" SET "+kv+" WHERE `"+d.Key+"`=?";
+
+	res, err := db.Exec(sql, val) // 执行语句并返回
+
+	//删除缓存
+	d.Delete_cache(value);
+
+	return res, err
+}
+
+func (d *Tbl) Delete(value interface{}) (sql.Result, error) {
+	db  := nice.Instance(config.APP_NAME).Db();
+	tbl := d.Name;
+	cmd := ` DELETE FROM `;
+	val := ConvertToString(value);
+	sql := cmd+tbl+" WHERE `"+d.Key+"`=?";
+	res, err := db.Exec(sql, val) // 执行语句并返回
+
+	//删除缓存
+	d.Delete_cache(value);
+
+	return res, err
+}
+
 func (d *Tbl) implode(data map[string]interface{}) string{
 	sql := ``
 	for key, value := range data { // 遍历要传入的数据
 		// 拼接set后的字符串  a=1,b='2',c=11
-		if attr, ok := d.Cols[key]; ok { // 如果表中存在这个字段
-			// 存在这个字段
-			if attr!="" {
-				sql = sql + "`" + key + "`" + `='` + convertToString(value) + `',`;
-			}
-		}
+		sql = sql + "`" + key + "`" + `='` + ConvertToString(value) + `',`;
 	}
 	sql = strings.TrimRight(sql, `,`) // 去掉最后的逗号
 
 	return sql;
 }
 
+func (d *Tbl) Fetch_cache(value interface{}) (map[string]interface{}, error){
+	cache := nice.Instance(config.APP_NAME).Cache();
+	if cache!=nil {
+		ckey := d.Name+"_"+ConvertToString(value);
+		data,err := cache.Do("GET", ckey);
+		if err!=nil || data==nil{
+			return nil, nil
+		}
+		
+		var m map[string]interface{}
+		err = json.Unmarshal(data.([]byte), &m);
+		if err!=nil{
+			return nil, nil
+		}
+		return m, nil
+	}
+	return nil, nil
+}
 
-// func (d *Tbl) Fetch_cache(value interface{}) (map[string]interface{}, error){
+func (d *Tbl) Store_cache(value interface{}, data map[string]interface{}) bool{
+	cache := nice.Instance(config.APP_NAME).Cache();
+	if cache!=nil {
+		ckey := d.Name+"_"+ConvertToString(value);
+	    str, err := json.Marshal(data)
 
-// }
+	    if err != nil {
+	        return false;
+	    }
+		_, err = cache.Do("SET", ckey, str);
+		return err==nil;
+	}
+	return false
+}
 
-// func (d *Tbl) Store_cache(value interface{}, data map[string]interface{}) error{
-
-// }
-
-// func (d *Tbl) Delete_cache(value interface{}) error{
-
-// }
-
+func (d *Tbl) Delete_cache(value interface{}) bool{
+	cache := nice.Instance(config.APP_NAME).Cache();
+	if cache!=nil {
+		ckey := d.Name+"_"+ConvertToString(value);
+		_, err := cache.Do("DEL", ckey);
+		return err==nil;
+	}
+	return false
+}
 
 // 把数据转换为字符串
-func convertToString(m interface{}) string {
+func ConvertToString(m interface{}) string {
 	switch m.(type) {
 	case int64:
 		return strconv.FormatInt(m.(int64),10)
@@ -105,4 +166,19 @@ func convertToString(m interface{}) string {
 		return m.(string)
 	}
 	return ""
+}
+
+// 把数据转换为字符串
+func ConvertToInt32(m interface{}) int32 {
+	switch m.(type) {
+	case int64:
+		return int32(m.(int64))
+	case int:
+		return int32(m.(int))
+	case float64:
+		return int32(m.(float64))
+	default:
+		return m.(int32)
+	}
+	return 0
 }
