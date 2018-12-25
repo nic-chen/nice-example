@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"database/sql"
 	"github.com/nic-chen/nice"
-	"../../config"
+	"../config"
 	"strconv"
 	_ "github.com/go-sql-driver/mysql"
 )
