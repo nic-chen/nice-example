@@ -66,20 +66,24 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if config.SrvName!="" && config.JaegerAddr!="" {
 		tracer, err = tracing.Init(config.SrvName, config.JaegerAddr)
 		if err != nil {
 			panic(err)
 		}
-		//监听退出
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
-
-		go func() {
-			<-ch
-			register.UnRegister()
-			os.Exit(1)
-		}()
 	}
 
-	run(register, tracer);
+	//监听退出
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL, syscall.SIGHUP, syscall.SIGQUIT)
+
+	go func() {
+		<-ch
+		register.UnRegister()
+		os.Exit(1)
+	}()
+
+	run(register, tracer)
 }

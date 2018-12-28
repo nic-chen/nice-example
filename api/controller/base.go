@@ -43,13 +43,36 @@ func RenderJson(c *nice.Context, code int, message string, data interface{}) {
 }
 
 func newSrvDialer(serviceName string) *grpc.ClientConn {
-	r := etcdv3.NewResolver(serviceName)
-	b := grpc.RoundRobin(r)
+	var err error
+	var opts []grpc.DialOption
+	opts = append(opts, grpc.WithBlock())
+	opts = append(opts, grpc.WithInsecure())
+
+	//如果配置了jaeger
+	if len(config.JaegerAddr)>0 {
+		tracer, err := tracing.Init(config.CliName, config.JaegerAddr)
+		if err==nil{
+			opts = append(opts, grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(tracer)))
+		}
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	tracer, err := tracing.Init(config.CliName, config.JaegerAddr)
-	conn, err := grpc.DialContext(ctx, config.NamingAddr, grpc.WithInsecure(), grpc.WithBalancer(b), grpc.WithBlock(), grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(tracer)))
+
+	var conn *grpc.ClientConn
+
+	//如果配置了etcd
+	if len(config.NamingAddr)>0 {
+		r := etcdv3.NewResolver(serviceName)
+		b := grpc.RoundRobin(r)
+		opts = append(opts, grpc.WithBalancer(b))
+
+		conn, err = grpc.DialContext(ctx, config.NamingAddr, opts...)
+	} else {
+		conn, err = grpc.DialContext(ctx, serviceName, opts...)
+	}
+
 	cancel()
+
 	if err != nil {
 		panic(err)
 	}

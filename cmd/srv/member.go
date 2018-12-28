@@ -23,11 +23,13 @@ func RunMemberSrv(register registry.Registry, tracer opentracing.Tracer) {
 
 	listen := net.JoinHostPort(config.SrvHost, config.SrvPort)
 
-	var opts = []micro.Option{
-		micro.WithRegistry(register, config.MemberSrvName, listen),
-		micro.WithTracer(tracer),
+	var opts []micro.Option
+	if register!=nil {
+		opts = append(opts, micro.WithRegistry(register, config.MemberSrvName, listen))
 	}
-
+	if tracer!=nil {
+		opts = append(opts, micro.WithTracer(tracer))
+	}
 
 	server, err := micro.NewServer(config.MemberSrvName, opts...)
 
