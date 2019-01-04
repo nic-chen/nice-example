@@ -2,8 +2,8 @@ package membersrv
 
 import (
 	"context"
-	"../../dao"
-	"../../proto/member"
+	"nice-example/dao"
+	"nice-example/proto/member"
 )
 
 type memberService struct {

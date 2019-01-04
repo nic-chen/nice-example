@@ -1,8 +1,8 @@
 package srv
 
 import (
-	"../../api"
-	"../../config"
+	"nice-example/api"
+	"nice-example/config"
 
 	"github.com/nic-chen/nice"
 	"github.com/nic-chen/nice/micro/registry"

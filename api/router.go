@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/nic-chen/nice"
-	"../config"
-	"./controller"
+	"nice-example/config"
+	"nice-example/api/controller"
 )
 
 func Router() {

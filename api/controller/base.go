@@ -4,7 +4,7 @@ import (
 	"time"
 	"context"
 	
-	"../../config"
+	"nice-example/config"
 
 	"github.com/nic-chen/nice"
 	"github.com/nic-chen/nice/micro/tracing"

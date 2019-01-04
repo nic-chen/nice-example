@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/nic-chen/nice"
-	"../config"
+	"nice-example/config"
 )
 
 func main() {

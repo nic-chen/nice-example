@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/nic-chen/nice"
-	"../../dao"
-	"../../config"
+	"nice-example/dao"
+	"nice-example/config"
 
-	proto "../../proto/member"
+	proto "nice-example/proto/member"
 )
 
 type member struct{}

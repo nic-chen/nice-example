@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net"
 
-	"../../proto/member"
-	"../../services/membersrv"
-	"../../config"
+	"nice-example/proto/member"
+	"nice-example/services/membersrv"
+	"nice-example/config"
 
 	"github.com/nic-chen/nice/micro"
 	"github.com/nic-chen/nice/micro/registry"
