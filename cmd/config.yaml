@@ -1,0 +1,37 @@
+version: v1
+appname: example
+debug: false
+httpbind: 0.0.0.0:8202
+pprofbind: localhost:2045
+clientname: member-cli
+servername: localhost:50001
+serverhost: ''
+serverport: '50001'
+servercheckttl: 30
+etcd: http://127.0.0.1:2379
+jaeger: 127.0.0.1:6831
+mysql:
+  database: mz_qing
+  charset: utf8
+  master:
+    host: 172.16.180.24
+    user: tmpdump
+    password: meizu.com
+    maxopen: 100
+    maxidle: 10
+  slaves:
+    - host: 172.16.180.24
+      user: tmpdump
+      password: meizu.com
+      maxopen: 100
+      maxidle: 10
+    - host: 172.16.180.24
+      user: tmpdump
+      password: meizu.com
+      maxopen: 100
+      maxidle: 10
+redis:
+  host: 127.0.0.1:6379
+  password: 
+  index: 0
+  prefix: exmp_

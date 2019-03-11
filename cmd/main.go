@@ -1,36 +1,36 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
-	"log"
-	"os/signal"
-	"syscall"
-	"strings"
-	"nice-example/cmd/srv"
-	"nice-example/config"
+	"github.com/nic-chen/nice"
 	"github.com/nic-chen/nice/micro/registry"
-	"github.com/nic-chen/nice/micro/tracing"
 	_ "github.com/nic-chen/nice/micro/registry/etcdv3"
+	"github.com/nic-chen/nice/micro/tracing"
 	opentracing "github.com/opentracing/opentracing-go"
+	"log"
+	"nice-example/cmd/srv"
+	"os"
+	"os/signal"
+	//"strings"
+	"syscall"
 )
 
+var conf string
+
 func usage() {
-	fmt.Fprintf(os.Stderr, "nice examples\n")
-	fmt.Fprintf(os.Stderr, "USAGE\n")
-	fmt.Fprintf(os.Stderr, "  nice-test command \n")
-	fmt.Fprintf(os.Stderr, "\n")
-	fmt.Fprintf(os.Stderr, "The commands are\n")
-	fmt.Fprintf(os.Stderr, "  all          Boots all services\n")
-	fmt.Fprintf(os.Stderr, "  api          Api gateway\n")
-	fmt.Fprintf(os.Stderr, "\n")
+	fmt.Fprintf(os.Stderr, "请用 -c 指定配置文件 \n")
+}
+
+func init() {
+	flag.StringVar(&conf, "c", "/data/config.yaml", "配置文件绝对路径")
 }
 
 func main() {
 
 	var (
 		register registry.Registry
-		tracer opentracing.Tracer
+		tracer   opentracing.Tracer
 		err      error
 	)
 
@@ -39,37 +39,27 @@ func main() {
 		os.Exit(1)
 	}
 
-	var run func(registry.Registry, opentracing.Tracer)
+	flag.Parse()
 
-	switch cmd := strings.ToLower(os.Args[1]); cmd {
-	case "all":
-		run = srv.RunAll
-	case "api":
-		run = srv.RunApi
-	case "member":
-		run = srv.RunMemberSrv		
-	default:
-		usage()
-		os.Exit(1)
-	}
+	config := nice.LoadConfig(conf)
 
-	if config.SrvName != "" && config.SrvHost != "" && config.SrvPort != "" && config.NamingAddr != ""  {
+	if config["appname"].(string) != "" && config["serverhost"].(string) != "" && config["serverport"].(string) != "" && config["etcd"].(string) != "" {
 		options := &registry.Options{
-			Name: config.SrvName,
-			Host: config.SrvHost,
-			Port: config.SrvPort,
-			TTL: config.SrvCheckTTL,
-			Ssrv: config.NamingAddr,
+			Name: config["appname"].(string),
+			Host: config["serverhost"].(string),
+			Port: config["serverport"].(string),
+			TTL:  config["servercheckttl"].(int),
+			Ssrv: config["etcd"].(string),
 		}
 		register, err = registry.DefaultRegistry(options)
-		log.Printf("NamingAddr: %s", config.NamingAddr)
+		log.Printf("NamingAddr: %s", config["etcd"])
 		if err != nil {
 			panic(err)
 		}
 	}
 
-	if config.SrvName!="" && config.JaegerAddr!="" {
-		tracer, err = tracing.Init(config.SrvName, config.JaegerAddr)
+	if config["appname"].(string) != "" && config["jaeger"].(string) != "" {
+		tracer, err = tracing.Init(config["appname"].(string), config["jaeger"].(string))
 		if err != nil {
 			panic(err)
 		}
@@ -85,5 +75,5 @@ func main() {
 		os.Exit(1)
 	}()
 
-	run(register, tracer)
+	srv.RunAll(register, tracer, config)
 }

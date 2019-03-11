@@ -5,52 +5,91 @@ import (
 	"errors"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/mitchellh/mapstructure"
 	"log"
+	"os"
 	"strconv"
+	"time"
 )
 
 // mysql is DB pool struct
 type Mysql struct {
-	DriverName     string
-	DataSourceName string
-	MaxOpenConns   int
-	MaxIdleConns   int
-	DB          *sql.DB
+	DriverName string
+	Master     *sql.DB
+	Slave      *sql.DB
+	Loger      Logger
+}
+
+type MysqlConf struct {
+	//map类型
+	Master      MysqlNode   `yaml: "master"`
+	Slave       []MysqlNode `yaml: "slaves"`
+	Database    string      `yaml: "database"`
+	Charset     string      `yaml: "charset"`
+	MaxLifetime string      `yaml: "maxlifetime"`
+}
+
+type MysqlNode struct {
+	Host     string `yaml: "host"`
+	User     string `yaml: "user"`
+	Password string `yaml: "password"`
+	MaxOpen  int    `yaml: "maxopen"` //maxOpenConn
+	MaxIdle  int    `yaml: "maxidle"` //maxIdleConn
 }
 
 // Init DB pool
-func NewMysql(host, database, user, password, charset string, maxOpenConns, maxIdleConns int) *Mysql {
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&autocommit=true", user, password, host, database, charset)
+func NewMysql(config interface{}) *Mysql {
+	var err error
 	p := &Mysql{
 		DriverName: "mysql",
-		DataSourceName: dataSourceName,
-		MaxOpenConns: maxOpenConns,
-		MaxIdleConns: maxIdleConns,
+		Loger:      log.New(os.Stderr, "[Nice] ", log.LstdFlags),
 	}
-	if err := p.Open(); err != nil {
-		log.Panicln("Init mysql pool failed.", err.Error())
+
+	p.Loger.Printf("mysql config:%v", config)
+	conf := MysqlConf{}
+	err = mapstructure.Decode(config.(map[interface{}]interface{}), &conf)
+
+	p.Master, err = p.Connect(conf.Master, conf.Database, conf.Charset, conf.MaxLifetime)
+	if err != nil {
+		p.Loger.Panicln("Init mysql master pool failed.", err.Error())
 	}
+
+	// p.Slave, err = p.Connect(conf.Slave, conf.Database, conf.Charset, conf.MaxLifetime)
+	// if err != nil {
+	// 	return nil
+	// }
+
 	return p
 }
 
-func (p *Mysql) Open() error {
+func (p *Mysql) Connect(node MysqlNode, database, charset, MaxLifetime string) (*sql.DB, error) {
 	var err error
-	p.DB, err = sql.Open(p.DriverName, p.DataSourceName)
-	if err != nil {
-		return err
-	}
-	if err = p.DB.Ping(); err != nil {
-		return err
-	}
-	p.DB.SetMaxOpenConns(p.MaxOpenConns)
-	p.DB.SetMaxIdleConns(p.MaxIdleConns)
 
-	return err
+	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=%s&autocommit=true", node.User, node.Password, node.Host, database, charset)
+
+	p.Loger.Println("dsn: %s", dsn)
+
+	conn, err := sql.Open(p.DriverName, dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = conn.Ping(); err != nil {
+		return nil, err
+	}
+
+	conn.SetMaxOpenConns(node.MaxOpen)
+	conn.SetMaxIdleConns(node.MaxIdle)
+
+	mlt, _ := time.ParseDuration(MaxLifetime)
+
+	conn.SetConnMaxLifetime(mlt)
+
+	return conn, err
 }
 
 // Close pool
 func (p *Mysql) Close() error {
-	return p.DB.Close()
+	return p.Master.Close()
 }
 
 // Get via pool
@@ -70,8 +109,9 @@ func (p *Mysql) Get(queryStr string, args ...interface{}) (map[string]interface{
 
 // Query via pool
 func (p *Mysql) Query(sqlStr string, args ...interface{}) ([]map[string]interface{}, error) {
-	rows, err := p.DB.Query(sqlStr, args...)
+	rows, err := p.Master.Query(sqlStr, args...)
 	if err != nil {
+		p.Loger.Printf("query err: %v", err)
 		return []map[string]interface{}{}, err
 	}
 	defer rows.Close()
@@ -97,8 +137,17 @@ func (p *Mysql) Query(sqlStr string, args ...interface{}) ([]map[string]interfac
 	return rowsMap, nil
 }
 
+// QueryRow via pool
+func (p *Mysql) QueryRow(sqlStr string, args ...interface{}) *sql.Row {
+	return p.Master.QueryRow(sqlStr, args...)
+}
+
 func (p *Mysql) Exec(sqlStr string, args ...interface{}) (sql.Result, error) {
-	return p.DB.Exec(sqlStr, args...)
+	res, err := p.Master.Exec(sqlStr, args...)
+	if err != nil {
+		p.Loger.Printf("exec err: %v", err)
+	}
+	return res, err
 }
 
 // Update via pool
@@ -135,14 +184,16 @@ func (p *Mysql) Delete(deleteStr string, args ...interface{}) (int64, error) {
 // SQLConnTransaction is for transaction connection
 type SQLConnTransaction struct {
 	SQLTX *sql.Tx
+	Loger Logger
 }
 
 // Begin transaction
 func (p *Mysql) Begin() (*SQLConnTransaction, error) {
 	var oneSQLConnTransaction = &SQLConnTransaction{}
 	var err error
-	if pingErr := p.DB.Ping(); pingErr == nil {
-		oneSQLConnTransaction.SQLTX, err = p.DB.Begin()
+	if pingErr := p.Master.Ping(); pingErr == nil {
+		oneSQLConnTransaction.SQLTX, err = p.Master.Begin()
+		oneSQLConnTransaction.Loger = p.Loger
 	}
 	return oneSQLConnTransaction, err
 }
@@ -176,7 +227,7 @@ func (t *SQLConnTransaction) Get(queryStr string, args ...interface{}) (map[stri
 func (t *SQLConnTransaction) Query(queryStr string, args ...interface{}) ([]map[string]interface{}, error) {
 	rows, err := t.SQLTX.Query(queryStr, args...)
 	if err != nil {
-		log.Println(err)
+		t.Loger.Printf("t query err: %v", err)
 		return []map[string]interface{}{}, err
 	}
 	defer rows.Close()
@@ -202,7 +253,11 @@ func (t *SQLConnTransaction) Query(queryStr string, args ...interface{}) ([]map[
 }
 
 func (t *SQLConnTransaction) Exec(sqlStr string, args ...interface{}) (sql.Result, error) {
-	return t.SQLTX.Exec(sqlStr, args...)
+	res, err := t.SQLTX.Exec(sqlStr, args...)
+	if err != nil {
+		t.Loger.Printf("t exec err: %v", err)
+	}
+	return res, err
 }
 
 // Update via transaction

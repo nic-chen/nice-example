@@ -55,7 +55,7 @@ const (
 type Context struct {
 	Req        *http.Request
 	Resp       *Response
-	nice        *Nice
+	nice       *Nice
 	store      map[string]interface{}
 	storeMutex sync.RWMutex  // store rw lock
 	routeName  string        // route name
@@ -63,6 +63,7 @@ type Context struct {
 	pValues    []string      // route params values
 	handlers   []HandlerFunc // middleware handler and route match handler
 	hi         int           // handlers execute position
+	uid        uint32        //login member id
 }
 
 // NewContext create a http context
@@ -88,6 +89,7 @@ func (c *Context) Reset(w http.ResponseWriter, r *http.Request) {
 	c.Resp.reset(w)
 	c.Req = r
 	c.hi = 0
+	c.uid = 0
 	c.handlers = c.handlers[:len(c.nice.middleware)]
 	c.routeName = ""
 	c.pNames = c.pNames[:0]
@@ -164,6 +166,21 @@ func (c *Context) ParamInt32(name string) int32 {
 	return int32(c.ParamInt64(name))
 }
 
+// ParamUint32 get route param from context and format to uint32
+func (c *Context) ParamUint32(name string) uint32 {
+	return uint32(c.ParamInt64(name))
+}
+
+// ParamUint16 get route param from context and format to uint16
+func (c *Context) ParamUint16(name string) uint16 {
+	return uint16(c.ParamInt64(name))
+}
+
+// ParamUint8 get route param from context and format to uint8
+func (c *Context) ParamUint8(name string) uint8 {
+	return uint8(c.ParamInt64(name))
+}
+
 // ParamInt64 get route param from context and format to int64
 func (c *Context) ParamInt64(name string) int64 {
 	v, _ := strconv.ParseInt(c.Param(name), 10, 64)
@@ -226,6 +243,21 @@ func (c *Context) QueryInt64(name string) int64 {
 	c.ParseForm(0)
 	v, _ := strconv.ParseInt(c.Req.Form.Get(name), 10, 64)
 	return v
+}
+
+// QueryUint32 get a param from http.Request.Form and format to uint32
+func (c *Context) QueryUint32(name string) uint32 {
+	return uint32(c.QueryInt64(name))
+}
+
+// QueryUint16 get a param from http.Request.Form and format to uint16
+func (c *Context) QueryUint16(name string) uint16 {
+	return uint16(c.QueryInt64(name))
+}
+
+// QueryUint8 get a param from http.Request.Form and format to uint8
+func (c *Context) QueryUint8(name string) uint8 {
+	return uint8(c.QueryInt64(name))
 }
 
 // QueryFloat get a param from http.Request.Form and format to float64
@@ -699,4 +731,14 @@ func (c *Context) Nice() *Nice {
 // DI get registered dependency injection service
 func (c *Context) DI(name string) interface{} {
 	return c.nice.GetDI(name)
+}
+
+// Set uid in context
+func (c *Context) SetUid(v uint32) {
+	c.uid = v
+}
+
+// Get uid from context
+func (c *Context) GetUid() uint32 {
+	return c.uid
 }
