@@ -10,6 +10,7 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 	"log"
 	"nice-example/cmd/srv"
+	"nice-example/constant"
 	"os"
 	"os/signal"
 	//"strings"
@@ -43,9 +44,9 @@ func main() {
 
 	config := nice.LoadConfig(conf)
 
-	if config["appname"].(string) != "" && config["serverhost"].(string) != "" && config["serverport"].(string) != "" && config["etcd"].(string) != "" {
+	if constant.APP_NAME != "" && config["serverhost"].(string) != "" && config["serverport"].(string) != "" && config["etcd"].(string) != "" {
 		options := &registry.Options{
-			Name: config["appname"].(string),
+			Name: constant.APP_NAME,
 			Host: config["serverhost"].(string),
 			Port: config["serverport"].(string),
 			TTL:  config["servercheckttl"].(int),
@@ -58,8 +59,8 @@ func main() {
 		}
 	}
 
-	if config["appname"].(string) != "" && config["jaeger"].(string) != "" {
-		tracer, err = tracing.Init(config["appname"].(string), config["jaeger"].(string))
+	if constant.APP_NAME != "" && config["jaeger"].(string) != "" {
+		tracer, err = tracing.Init(constant.APP_NAME, config["jaeger"].(string))
 		if err != nil {
 			panic(err)
 		}

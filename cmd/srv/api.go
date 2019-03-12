@@ -2,7 +2,7 @@ package srv
 
 import (
 	"nice-example/api"
-	//"nice-example/config"
+	"nice-example/constant"
 
 	"github.com/nic-chen/nice"
 	"github.com/nic-chen/nice/micro/registry"
@@ -11,11 +11,11 @@ import (
 )
 
 func RunApi(register registry.Registry, tracer opentracing.Tracer, config map[string]interface{}) {
-	n := nice.Instance(config["appname"].(string))
+	n := nice.Instance(constant.APP_NAME)
 
-	//c := n.LoadConfig("/data/www/golang/src/nice-example/cmd/config.yaml")
 	n.SetDI("cache", nice.NewRedis(config["redis"]))
 	n.SetDI("db", nice.NewMysql(config["mysql"]))
+	n.Conf = config
 
 	api.Router()
 

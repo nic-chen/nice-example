@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 
-	//"nice-example/config"
 	"nice-example/proto/member"
 	"nice-example/services/membersrv"
 

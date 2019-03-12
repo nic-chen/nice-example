@@ -1,17 +1,17 @@
 package controller
 
 import (
-	"time"
 	"context"
-	
-	"nice-example/config"
+	"time"
+
+	"nice-example/constant"
 
 	"github.com/nic-chen/nice"
 	"github.com/nic-chen/nice/micro/tracing"
 
-	"google.golang.org/grpc"
-	"github.com/nic-chen/nice/micro/registry/etcdv3"
 	"github.com/grpc-ecosystem/grpc-opentracing/go/otgrpc"
+	"github.com/nic-chen/nice/micro/registry/etcdv3"
+	"google.golang.org/grpc"
 )
 
 type Controller struct {
@@ -29,7 +29,7 @@ func New(name string) *Controller {
 		Name: name,
 	}
 
-	return ctl;
+	return ctl
 }
 
 func RenderJson(c *nice.Context, code int, message string, data interface{}) {
@@ -48,10 +48,12 @@ func newSrvDialer(serviceName string) *grpc.ClientConn {
 	opts = append(opts, grpc.WithBlock())
 	opts = append(opts, grpc.WithInsecure())
 
+	n := nice.Instance(constant.APP_NAME)
+
 	//如果配置了jaeger
-	if len(config.JaegerAddr)>0 {
-		tracer, err := tracing.Init(config.CliName, config.JaegerAddr)
-		if err==nil{
+	if len(n.Conf["jaeger"].(string)) > 0 {
+		tracer, err := tracing.Init(n.Conf["clientname"].(string), n.Conf["jaeger"].(string))
+		if err == nil {
 			opts = append(opts, grpc.WithUnaryInterceptor(otgrpc.OpenTracingClientInterceptor(tracer)))
 		}
 	}
@@ -61,12 +63,12 @@ func newSrvDialer(serviceName string) *grpc.ClientConn {
 	var conn *grpc.ClientConn
 
 	//如果配置了etcd
-	if len(config.NamingAddr)>0 {
+	if len(n.Conf["etcd"].(string)) > 0 {
 		r := etcdv3.NewResolver(serviceName)
 		b := grpc.RoundRobin(r)
 		opts = append(opts, grpc.WithBalancer(b))
 
-		conn, err = grpc.DialContext(ctx, config.NamingAddr, opts...)
+		conn, err = grpc.DialContext(ctx, n.Conf["etcd"].(string), opts...)
 	} else {
 		conn, err = grpc.DialContext(ctx, serviceName, opts...)
 	}
@@ -79,4 +81,3 @@ func newSrvDialer(serviceName string) *grpc.ClientConn {
 
 	return conn
 }
-
