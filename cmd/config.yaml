@@ -20,18 +20,16 @@ mysql:
     maxopen: 100
     maxidle: 10
   slaves:
-    - host: 172.16.180.24
-      user: tmpdump
-      password: meizu.com
-      maxopen: 100
-      maxidle: 10
-    - host: 172.16.180.24
-      user: tmpdump
-      password: meizu.com
-      maxopen: 100
-      maxidle: 10
+    host: 172.16.180.24
+    user: tmpdump
+    password: meizu.com
+    maxopen: 100
+    maxidle: 10
 redis:
   host: 127.0.0.1:6379
-  password: 
+  password: ''
   index: 0
   prefix: exmp_
+  maxopen: 100
+  maxidle: 10
+  

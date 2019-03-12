@@ -2,6 +2,7 @@ package nice
 
 import (
 	redislib "github.com/gomodule/redigo/redis"
+	"github.com/mitchellh/mapstructure"
 	"log"
 	"time"
 )
@@ -25,21 +26,25 @@ type RedisCnf struct {
 type RedisNode struct {
 	Host     string `yaml: "host"`
 	Password string `yaml: "password"`
-	Db       int    `yaml: "db"`
-	Open     int    `yaml: "open"`
-	Idle     int    `yaml: "idle"`
+	Index    int    `yaml: "index"`
+	MaxOpen  int    `yaml: "maxopen"` //maxOpenConn
+	MaxIdle  int    `yaml: "maxidle"` //maxIdleConn
 }
 
-func NewRedis(host, password string, database, MaxActive, maxIdleConns int) *Redis {
+func NewRedis(config interface{}) *Redis {
+
+	conf := RedisNode{}
+	err := mapstructure.Decode(config.(map[interface{}]interface{}), &conf)
+
 	r := &Redis{
-		host:     host,
-		password: password,
-		database: database,
-		idle:     maxIdleConns,
-		active:   MaxActive,
+		host:     conf.Host,
+		password: conf.Password,
+		database: conf.Index,
+		idle:     conf.MaxOpen,
+		active:   conf.MaxIdle,
 	}
 	r.Open()
-	if _, err := r.Do("PING"); err != nil {
+	if _, err = r.Do("PING"); err != nil {
 		log.Panicln("Init redis pool failed.", err.Error())
 	}
 	return r

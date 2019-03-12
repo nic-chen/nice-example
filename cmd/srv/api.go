@@ -14,7 +14,7 @@ func RunApi(register registry.Registry, tracer opentracing.Tracer, config map[st
 	n := nice.Instance(config["appname"].(string))
 
 	//c := n.LoadConfig("/data/www/golang/src/nice-example/cmd/config.yaml")
-	//n.SetDI("cache", nice.NewRedis(config["REDISHOST"].(string), config["REDISPWD"].(string), config["REDISDB"].(int), config["DBCONNOPEN"].(int), config["DBCONNIDLE"].(int)))
+	n.SetDI("cache", nice.NewRedis(config["redis"]))
 	n.SetDI("db", nice.NewMysql(config["mysql"]))
 
 	api.Router()

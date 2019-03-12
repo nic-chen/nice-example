@@ -124,7 +124,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:b4fbe5d6b5441427c3d7ce244c8bca8294e52ddaeeb318d946fa4d6d3bb302a1"
+  digest = "1:5159d7d097e85ff8182fe0c4b5baa8b9445dfe32479e49cb9a7dc0c87ec0cefb"
   name = "github.com/nic-chen/nice"
   packages = [
     ".",
@@ -134,7 +134,7 @@
     "micro/tracing",
   ]
   pruneopts = "UT"
-  revision = "b1bdb78ab52ca4f8722843af38fd2d228e06bab3"
+  revision = "d34fe88d1396f728936a4a614688ef8b3d79e455"
 
 [[projects]]
   digest = "1:450b7623b185031f3a456801155c8320209f75d0d4c4e633c6b1e59d44d6e392"
@@ -289,15 +289,15 @@
     "trace",
   ]
   pruneopts = "UT"
-  revision = "56fb01167e7d1e1d17dd87993d34c963f4356e87"
+  revision = "d8887717615a059821345a5c23649351b52a1c0b"
 
 [[projects]]
   branch = "master"
-  digest = "1:1ac73f06b9fb3a62fac8bd63b7312ba35b03301d0ea89ebdac41a5757c54cea4"
+  digest = "1:f36c7b9a36158e62ffe5d8b02d1b5955500c13106cdaeebf5323d88863cae96f"
   name = "golang.org/x/sys"
   packages = ["unix"]
   pruneopts = "UT"
-  revision = "10058d7d4faa7dd5ef860cbd31af00903076e7b8"
+  revision = "c8c8c57fd1e1a977c10821a559dda983a9a9a3b5"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
